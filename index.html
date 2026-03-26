@@ -209,6 +209,15 @@ var IMG_PI_TYPOLOGY = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAACaAAAARNCAY
             }
         };
 
+        function typDesc(typ) {
+            var total = typ.wetFTE + typ.compFTE;
+            var parts = [];
+            if (typ.wetFTE > 0) parts.push(typ.wetFTE + ' wet');
+            if (typ.compFTE > 0) parts.push(typ.compFTE + ' comp');
+            if (parts.length === 0) return 'PI + 0 researchers';
+            return 'PI + ' + total + ' researchers (' + parts.join(' / ') + ')';
+        }
+
         function updateTypologiesFromRates() {
             var w = calcWetPerFTE();
             var c = calcCompPerFTE();
@@ -536,10 +545,10 @@ var IMG_PI_TYPOLOGY = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAACaAAAARNCAY
                 var meta = STANDARDS_META[ck];
                 html += '<tr>';
                 html += '<td style="font-weight:500">' + meta.label + '</td>';
-                html += '<td><input type="number" value="' + RATES[ck].wet + '" min="0" max="500" onchange="RATES[\'' + ck + '\'].wet=Number(this.value);updateTypologiesFromRates();debouncedRender()"></td>';
+                html += '<td><input type="number" value="' + RATES[ck].wet + '" min="0" max="500" data-field="rate_wet_' + ck + '" onchange="RATES[\'' + ck + '\'].wet=Number(this.value);updateTypologiesFromRates();debouncedRender()"></td>';
                 // Refinement #1: Only show comp input for writeup and collab
                 if (COMP_APPLICABLE[ck]) {
-                    html += '<td><input type="number" value="' + RATES[ck].comp + '" min="0" max="500" onchange="RATES[\'' + ck + '\'].comp=Number(this.value);updateTypologiesFromRates();debouncedRender()"></td>';
+                    html += '<td><input type="number" value="' + RATES[ck].comp + '" min="0" max="500" data-field="rate_comp_' + ck + '" onchange="RATES[\'' + ck + '\'].comp=Number(this.value);updateTypologiesFromRates();debouncedRender()"></td>';
                 } else {
                     html += '<td style="text-align:center;color:var(--mut);font-size:.6rem">—</td>';
                 }
@@ -553,11 +562,11 @@ var IMG_PI_TYPOLOGY = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAACaAAAARNCAY
             html += '<td></td></tr>';
 
             html += '<tr><td style="font-weight:500">Faculty Office</td>';
-            html += '<td colspan="2"><input type="number" value="' + STANDARDS.facultyOffice + '" min="0" max="500" onchange="STANDARDS.facultyOffice=Number(this.value);for(var k in TYPOLOGIES)TYPOLOGIES[k].facultyOffice=Number(this.value);debouncedRender()"></td>';
+            html += '<td colspan="2"><input type="number" value="' + STANDARDS.facultyOffice + '" min="0" max="500" data-field="std_facultyOffice" onchange="STANDARDS.facultyOffice=Number(this.value);for(var k in TYPOLOGIES)TYPOLOGIES[k].facultyOffice=Number(this.value);debouncedRender()"></td>';
             html += '<td style="text-align:left;font-size:.6rem;color:var(--mut)">Per PI (perimeter)</td></tr>';
 
             html += '<tr><td style="font-weight:500">Flex/Overflow Office</td>';
-            html += '<td colspan="2"><input type="number" value="' + STANDARDS.flexOffice + '" min="0" max="200" onchange="STANDARDS.flexOffice=Number(this.value);for(var k in TYPOLOGIES)TYPOLOGIES[k].flexOffice=Number(this.value);debouncedRender()"></td>';
+            html += '<td colspan="2"><input type="number" value="' + STANDARDS.flexOffice + '" min="0" max="200" data-field="std_flexOffice" onchange="STANDARDS.flexOffice=Number(this.value);for(var k in TYPOLOGIES)TYPOLOGIES[k].flexOffice=Number(this.value);debouncedRender()"></td>';
             html += '<td style="text-align:left;font-size:.6rem;color:var(--mut)">Overflow for some typologies</td></tr>';
 
             html += '</table></div>';
@@ -579,17 +588,17 @@ var IMG_PI_TYPOLOGY = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAACaAAAARNCAY
 
                 html += '<div class="typc ' + cls + '" style="background:' + typ.bgColor + '">';
                 html += '<h4>' + typ.label + '</h4>';
-                html += '<div style="font-size:.6rem;color:var(--mut);margin-bottom:6px">' + typ.desc + '</div>';
+                html += '<div style="font-size:.6rem;color:var(--mut);margin-bottom:6px">' + typDesc(typ) + '</div>';
 
-                html += '<div class="trow"><span class="tk">Wet FTE</span><span class="tv"><input type="number" value="' + typ.wetFTE + '" min="0" max="15" style="width:40px" onchange="TYPOLOGIES[\'' + typId + '\'].wetFTE=Number(this.value);debouncedRender()"></span></div>';
-                html += '<div class="trow"><span class="tk">Comp FTE</span><span class="tv"><input type="number" value="' + typ.compFTE + '" min="0" max="15" style="width:40px" onchange="TYPOLOGIES[\'' + typId + '\'].compFTE=Number(this.value);debouncedRender()"></span></div>';
+                html += '<div class="trow"><span class="tk">Wet FTE</span><span class="tv"><input type="number" value="' + typ.wetFTE + '" min="0" max="15" style="width:40px" data-field="typ_wet_' + typId + '" onchange="TYPOLOGIES[\'' + typId + '\'].wetFTE=Number(this.value);debouncedRender()"></span></div>';
+                html += '<div class="trow"><span class="tk">Comp FTE</span><span class="tv"><input type="number" value="' + typ.compFTE + '" min="0" max="15" style="width:40px" data-field="typ_comp_' + typId + '" onchange="TYPOLOGIES[\'' + typId + '\'].compFTE=Number(this.value);debouncedRender()"></span></div>';
                 html += '<div class="trow"><span class="tk">Group Size (PI+)</span><span class="tv">' + groupSize + '</span></div>';
                 html += '<div class="trow"><span class="tk">Wet Rate (NASF/FTE)</span><span class="tv">' + typ.wetPerFTE + '</span></div>';
                 html += '<div class="trow"><span class="tk">Comp Rate (NASF/FTE)</span><span class="tv">' + typ.compPerFTE + '</span></div>';
                 // Refinement #2: Show numerical value instead of "embedded"
                 html += '<div class="trow"><span class="tk">Faculty + Flex Office</span><span class="tv">' + typ.facultyOffice + ' + ' + typ.flexOffice + ' NASF</span></div>';
 
-                html += '<div class="trow"><span class="tk">Equiv. R01 Grants</span><span class="tv"><input type="number" value="' + typ.grants + '" min="0" max="10" style="width:40px" onchange="TYPOLOGIES[\'' + typId + '\'].grants=Number(this.value);debouncedRender()"></span></div>';
+                html += '<div class="trow"><span class="tk">Equiv. R01 Grants</span><span class="tv"><input type="number" value="' + typ.grants + '" min="0" max="10" style="width:40px" data-field="typ_grants_' + typId + '" onchange="TYPOLOGIES[\'' + typId + '\'].grants=Number(this.value);debouncedRender()"></span></div>';
                 html += '<div style="font-size:.58rem;color:var(--mut);padding:1px 0">$' + (grantVal / 1000000).toFixed(2) + 'M/yr (FY2023 NIH avg: $600K/grant)</div>';
 
                 // Refinement #7: Renamed to "Group NASF" and added NASF/FTE below
@@ -620,8 +629,8 @@ var IMG_PI_TYPOLOGY = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAACaAAAARNCAY
             html += '<div style="max-width:400px;margin-bottom:10px">';
             html += '<div class="cx" style="text-align:center">';
             html += '<div style="font-weight:900;color:var(--navy);font-size:.85rem">' + EXISTING.label + '</div>';
-            html += '<div style="margin:4px 0"><span style="font-size:.6rem;color:var(--mut)">Target NASF: </span><input type="number" value="' + EXISTING.targetNASF + '" style="width:70px" onchange="EXISTING.targetNASF=Number(this.value);debouncedRender()"></div>';
-            html += '<div><span style="font-size:.6rem;color:var(--mut)">Net:Gross: </span><input type="number" value="' + Math.round(EXISTING.netGross * 100) + '" step="1" min="30" max="80" style="width:42px" onchange="EXISTING.netGross=Number(this.value)/100;debouncedRender()">%</div>';
+            html += '<div style="margin:4px 0"><span style="font-size:.6rem;color:var(--mut)">Target NASF: </span><input type="number" value="' + EXISTING.targetNASF + '" style="width:70px" data-field="ex_targetNASF" onchange="EXISTING.targetNASF=Number(this.value);debouncedRender()"></div>';
+            html += '<div><span style="font-size:.6rem;color:var(--mut)">Net:Gross: </span><input type="number" value="' + Math.round(EXISTING.netGross * 100) + '" step="1" min="30" max="80" style="width:42px" data-field="ex_netGross" onchange="EXISTING.netGross=Number(this.value)/100;debouncedRender()">%</div>';
             var gsf = Math.round(EXISTING.targetNASF / EXISTING.netGross);
             html += '<div style="font-family:\'Roboto Mono\',monospace;font-size:.75rem;font-weight:600;color:var(--navy);margin-top:4px">' + F(gsf) + ' GSF</div>';
             html += '</div></div>';
@@ -656,8 +665,8 @@ var IMG_PI_TYPOLOGY = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAACaAAAARNCAY
             researchTotal += recruitTot;
             html += '<tr style="background:#FEB52220">';
             html += '<td style="text-align:left;font-weight:600;color:var(--gold)">Recruit Space</td>';
-            html += '<td><input type="number" value="' + EXISTING.recruits + '" min="0" max="20" style="width:42px" onchange="EXISTING.recruits=Number(this.value);debouncedRender()"></td>';
-            html += '<td><input type="number" value="' + EXISTING.recruitASF + '" min="0" max="3000" step="50" style="width:56px" onchange="EXISTING.recruitASF=Number(this.value);debouncedRender()"></td>';
+            html += '<td><input type="number" value="' + EXISTING.recruits + '" min="0" max="20" style="width:42px" data-field="ex_recruits" onchange="EXISTING.recruits=Number(this.value);debouncedRender()"></td>';
+            html += '<td><input type="number" value="' + EXISTING.recruitASF + '" min="0" max="3000" step="50" style="width:56px" data-field="ex_recruitASF" onchange="EXISTING.recruitASF=Number(this.value);debouncedRender()"></td>';
             html += '<td style="font-weight:600">' + F(recruitTot) + '</td>';
             html += '<td></td></tr>';
 
@@ -721,8 +730,8 @@ var IMG_PI_TYPOLOGY = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAACaAAAARNCAY
             for (var ri = 0; ri < EXISTING[fieldKey].length; ri++) {
                 var item = EXISTING[fieldKey][ri];
                 html += '<tr>';
-                html += '<td style="text-align:left"><input type="text" value="' + item.name + '" style="width:180px" onchange="EXISTING[\'' + fieldKey + '\'][' + ri + '].name=this.value"></td>';
-                html += '<td><input type="number" value="' + item.count + '" min="0" max="20" style="width:28px" onchange="EXISTING[\'' + fieldKey + '\'][' + ri + '].count=Number(this.value);debouncedRender()"> × <input type="number" value="' + item.sqft + '" min="0" max="50000" step="100" style="width:56px" onchange="EXISTING[\'' + fieldKey + '\'][' + ri + '].sqft=Number(this.value);debouncedRender()"></td>';
+                html += '<td style="text-align:left"><input type="text" value="' + item.name + '" style="width:180px" data-field="ex_' + fieldKey + '_name_' + ri + '" onchange="EXISTING[\'' + fieldKey + '\'][' + ri + '].name=this.value"></td>';
+                html += '<td><input type="number" value="' + item.count + '" min="0" max="20" style="width:28px" data-field="ex_' + fieldKey + '_cnt_' + ri + '" onchange="EXISTING[\'' + fieldKey + '\'][' + ri + '].count=Number(this.value);debouncedRender()"> × <input type="number" value="' + item.sqft + '" min="0" max="50000" step="100" style="width:56px" data-field="ex_' + fieldKey + '_sqft_' + ri + '" onchange="EXISTING[\'' + fieldKey + '\'][' + ri + '].sqft=Number(this.value);debouncedRender()"></td>';
                 html += '<td style="font-weight:600">' + F(item.count * item.sqft) + '</td>';
                 html += '<td style="white-space:nowrap">';
                 html += '<button style="background:none;border:none;color:var(--mut);cursor:pointer;font-size:.6rem" onclick="moveExistingCatItem(\'' + fieldKey + '\',' + ri + ',-1)" title="Move up">▲</button>';
@@ -793,8 +802,8 @@ var IMG_PI_TYPOLOGY = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAACaAAAARNCAY
                 var gsf = Math.round(sc.targetNASF / sc.netGross);
                 html += '<div class="cx" style="text-align:center">';
                 html += '<div style="font-weight:900;color:var(--navy);font-size:.85rem">' + sc.label + '</div>';
-                html += '<div style="margin:4px 0"><span style="font-size:.6rem;color:var(--mut)">Target NASF: </span><input type="number" value="' + sc.targetNASF + '" style="width:70px" onchange="SCENARIOS[' + si + '].targetNASF=Number(this.value);debouncedRender()"></div>';
-                html += '<div><span style="font-size:.6rem;color:var(--mut)">Net:Gross: </span><input type="number" value="' + Math.round(sc.netGross * 100) + '" step="1" min="30" max="80" style="width:42px" onchange="SCENARIOS[' + si + '].netGross=Number(this.value)/100;debouncedRender()">%</div>';
+                html += '<div style="margin:4px 0"><span style="font-size:.6rem;color:var(--mut)">Target NASF: </span><input type="number" value="' + sc.targetNASF + '" style="width:70px" data-field="sc_targetNASF_' + si + '" onchange="SCENARIOS[' + si + '].targetNASF=Number(this.value);debouncedRender()"></div>';
+                html += '<div><span style="font-size:.6rem;color:var(--mut)">Net:Gross: </span><input type="number" value="' + Math.round(sc.netGross * 100) + '" step="1" min="30" max="80" style="width:42px" data-field="sc_netGross_' + si + '" onchange="SCENARIOS[' + si + '].netGross=Number(this.value)/100;debouncedRender()">%</div>';
                 html += '<div style="font-family:\'Roboto Mono\',monospace;font-size:.75rem;font-weight:600;color:var(--navy);margin-top:4px">' + F(gsf) + ' GSF</div>';
                 html += '</div>';
             }
@@ -826,7 +835,7 @@ var IMG_PI_TYPOLOGY = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAACaAAAARNCAY
                     var grpNASF = typGroupASF(typ);
                     var tot = cnt * grpNASF;
                     scenTotals[si] += tot;
-                    html += '<td><input type="number" value="' + cnt + '" min="0" max="60" style="width:36px" onchange="SCENARIOS[' + si + '].piCounts[\'' + typId + '\']=Number(this.value);debouncedRender()"></td>';
+                    html += '<td><input type="number" value="' + cnt + '" min="0" max="60" style="width:36px" data-field="sc_pi_' + typId + '_' + si + '" onchange="SCENARIOS[' + si + '].piCounts[\'' + typId + '\']=Number(this.value);debouncedRender()"></td>';
                     html += '<td>' + F(grpNASF) + '</td>';
                     html += '<td style="font-weight:600">' + F(tot) + '</td>';
                 }
@@ -840,7 +849,7 @@ var IMG_PI_TYPOLOGY = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAACaAAAARNCAY
                 var sc = SCENARIOS[si];
                 var rTot = sc.recruits * sc.recruitASF;
                 scenTotals[si] += rTot;
-                html += '<td><input type="number" value="' + sc.recruits + '" min="0" max="20" style="width:36px" onchange="SCENARIOS[' + si + '].recruits=Number(this.value);debouncedRender()"> × <input type="number" value="' + sc.recruitASF + '" min="0" max="3000" step="50" style="width:50px" onchange="SCENARIOS[' + si + '].recruitASF=Number(this.value);debouncedRender()"></td>';
+                html += '<td><input type="number" value="' + sc.recruits + '" min="0" max="20" style="width:36px" data-field="sc_recruits_' + si + '" onchange="SCENARIOS[' + si + '].recruits=Number(this.value);debouncedRender()"> × <input type="number" value="' + sc.recruitASF + '" min="0" max="3000" step="50" style="width:50px" data-field="sc_recruitASF_' + si + '" onchange="SCENARIOS[' + si + '].recruitASF=Number(this.value);debouncedRender()"></td>';
                 html += '<td></td>';
                 html += '<td style="font-weight:600">' + F(rTot) + '</td>';
             }
@@ -952,10 +961,10 @@ var IMG_PI_TYPOLOGY = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAACaAAAARNCAY
             for (var ri = 0; ri < maxItems; ri++) {
                 html += '<tr>';
                 var itemName = SCENARIOS[0][fieldKey][ri] ? SCENARIOS[0][fieldKey][ri].name : 'Item ' + (ri + 1);
-                html += '<td><input type="text" value="' + itemName + '" style="width:160px" onchange="for(var s=0;s<SCENARIOS.length;s++){if(SCENARIOS[s][\'' + fieldKey + '\'][' + ri + '])SCENARIOS[s][\'' + fieldKey + '\'][' + ri + '].name=this.value}"></td>';
+                html += '<td><input type="text" value="' + itemName + '" style="width:160px" data-field="sc_' + fieldKey + '_name_' + ri + '" onchange="for(var s=0;s<SCENARIOS.length;s++){if(SCENARIOS[s][\'' + fieldKey + '\'][' + ri + '])SCENARIOS[s][\'' + fieldKey + '\'][' + ri + '].name=this.value}"></td>';
                 if (isAdmin) {
                     var curPeople = (SCENARIOS[0][fieldKey][ri] && SCENARIOS[0][fieldKey][ri].people !== undefined) ? SCENARIOS[0][fieldKey][ri].people : 0;
-                    html += '<td><input type="number" value="' + curPeople + '" min="0" max="500" style="width:42px" onchange="for(var s=0;s<SCENARIOS.length;s++){if(SCENARIOS[s].administration[' + ri + '])SCENARIOS[s].administration[' + ri + '].people=Number(this.value)};debouncedRender()"></td>';
+                    html += '<td><input type="number" value="' + curPeople + '" min="0" max="500" style="width:42px" data-field="sc_' + fieldKey + '_ppl_' + ri + '" onchange="for(var s=0;s<SCENARIOS.length;s++){if(SCENARIOS[s].administration[' + ri + '])SCENARIOS[s].administration[' + ri + '].people=Number(this.value)};debouncedRender()"></td>';
                     var curSeatType = (SCENARIOS[0][fieldKey][ri] && SCENARIOS[0][fieldKey][ri].seatType) ? SCENARIOS[0][fieldKey][ri].seatType : '';
                     html += '<td><select style="font-size:.6rem;width:90px" onchange="for(var s=0;s<SCENARIOS.length;s++){if(SCENARIOS[s].administration[' + ri + '])SCENARIOS[s].administration[' + ri + '].seatType=this.value};debouncedRender()">';
                     html += '<option value=""' + (curSeatType === '' ? ' selected' : '') + '>—</option>';
@@ -966,7 +975,7 @@ var IMG_PI_TYPOLOGY = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAACaAAAARNCAY
                 for (var si = 0; si < SCENARIOS.length; si++) {
                     var item = SCENARIOS[si][fieldKey][ri];
                     if (item) {
-                        html += '<td><input type="number" value="' + item.count + '" min="0" max="20" style="width:28px" onchange="SCENARIOS[' + si + '][\'' + fieldKey + '\'][' + ri + '].count=Number(this.value);debouncedRender()"> × <input type="number" value="' + item.sqft + '" min="0" max="50000" step="100" style="width:56px" onchange="SCENARIOS[' + si + '][\'' + fieldKey + '\'][' + ri + '].sqft=Number(this.value);debouncedRender()"></td>';
+                        html += '<td><input type="number" value="' + item.count + '" min="0" max="20" style="width:28px" data-field="sc_' + fieldKey + '_cnt_' + ri + '_' + si + '" onchange="SCENARIOS[' + si + '][\'' + fieldKey + '\'][' + ri + '].count=Number(this.value);debouncedRender()"> × <input type="number" value="' + item.sqft + '" min="0" max="50000" step="100" style="width:56px" data-field="sc_' + fieldKey + '_sqft_' + ri + '_' + si + '" onchange="SCENARIOS[' + si + '][\'' + fieldKey + '\'][' + ri + '].sqft=Number(this.value);debouncedRender()"></td>';
                         html += '<td style="font-weight:600">' + F(item.count * item.sqft) + '</td>';
                     } else {
                         html += '<td>—</td><td>—</td>';
